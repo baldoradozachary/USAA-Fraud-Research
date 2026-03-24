@@ -151,7 +151,7 @@ These views help analysts scan activity patterns quickly.
 - Codebase supports future expansion such as more sources or ML classification  
 
 ---
-
+## Updated project documentation and deployment configuration.
 ## Acknowledgement
 Developed for the USAA Fraud Research Project as an applied demonstration of applied data science, automation and interactive analytics.
 
