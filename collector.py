@@ -84,9 +84,7 @@ def insert_raw_article(title, url, full_text, source="TechCrunch"):
         return raw_id, keywords_found
 
     keywords_found = extract_keywords(full_text, KEYWORDS)
-    raw_id = str(uuid4())
-    supabase.table("raw_articles").insert({
-        "id": raw_id,
+    inserted = supabase.table("raw_articles").insert({
         "title": title,
         "url": url,
         "keywords": ', '.join(sorted(set(kw.strip() for kw in keywords_found))),
@@ -94,6 +92,8 @@ def insert_raw_article(title, url, full_text, source="TechCrunch"):
         "source": source,
         "created_at": datetime.utcnow().isoformat()
     }).execute()
+
+    raw_id = inserted.data[0]["id"]
     return raw_id, keywords_found
 
 def insert_clean_article(raw_id, summary, keywords_found, title, url):
@@ -105,7 +105,6 @@ def insert_clean_article(raw_id, summary, keywords_found, title, url):
     keywords = ', '.join(sorted(set(kw.strip() for kw in keywords_found)))
 
     supabase.table("clean_articles").insert({
-        "id": str(uuid4()),
         "raw_id": raw_id,
         "summary": summary,
         "keywords": keywords,
@@ -115,7 +114,7 @@ def insert_clean_article(raw_id, summary, keywords_found, title, url):
         "url": url,
         "created_at": datetime.utcnow().isoformat()
     }).execute()
-
+    
 def deduplicate_clean_articles():
     response = supabase.table("clean_articles").select("*").execute()
     articles = response.data
@@ -160,11 +159,10 @@ def main(pages=5):
 
     # Save run stats into scrape_runs
     supabase.table("scrape_runs").insert({
-        "id": str(uuid4()),
-        "scraped_count": scraped_count,
-        "flagged_count": flagged_count,
-        "created_at": datetime.utcnow().isoformat()
-    }).execute()
+    "scraped_count": scraped_count,
+    "flagged_count": flagged_count,
+    "created_at": datetime.utcnow().isoformat()
+}).execute()
 
     print(f"📊 Run complete: Scraped {scraped_count}, Flagged {flagged_count}")
 
